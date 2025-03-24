@@ -1,45 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data; 
 using MongoDB.Driver;
 
 [ApiController]
 [Route("conexion")]
-
 public class Conexion : Controller {
-    [HttpGet("sql")]
-    
-    public IActionResult ListarPilotosSql(){
-       List<PilotosSQL> lista = new List<PilotosSQL>();
-
-       SqlConnection conn = new SqlConnection(CadenasConexion.SQL_SERVER);
-       SqlCommand cmd = new SqlCommand("select IdCarrera, Carrera from Carreras");
-       cmd.Connection = conn;
-       cmd.CommandType = System.Data.CommandType.Text;
-       cmd.Connection.Open();
-
-       SqlDataReader reader = cmd.ExecuteReader();
-
-       while (reader.Read()) {
-        CarreraSQL carrera = new CarreraSQL();
-        carrera.IdCarrera = reader.GetInt16("IdCarrera");
-        carrera.Carrera = reader.GetString("Carrera");
-
-        lista.Add(carrera);
-       }
-
-       reader.Close();
-       conn.Close();
-       return Ok(lista);
-    }
-
+    // Método para listar desde MongoDB
     [HttpGet("mongo")]
-    public IActionResult ListarSalonesMongoDb(){
-        MongoClient client = new MongoClient(CadenasConexion.MONGO_DB);
-        var db= client.GetDatabase("Practica2_Ivan");
-        var collection = db.GetCollection<SalonMongo>("Salones");
-        
-        var lista = collection.Find(FilterDefinition<SalonMongo>.Empty).ToList();
-        return Ok(lista);
+    public IActionResult ListarSalonesMongoDb() {
+        // Conexión a MongoDB
+        MongoClient client = new MongoClient(CadenasConexionX.MONGO_DB);
+        var db = client.GetDatabase("Practica2_Ricardo_Joselyn");
+        var collection = db.GetCollection<ClasificacionMongo>("ClasificacionPilotos");
+
+        // Obtener todos los documentos de la colección
+        var lista = collection.Find(FilterDefinition<ClasificacionMongo>.Empty).ToList();
+
+        return Ok(lista); // Retorna la lista de pilotos en formato JSON
     }
 }
